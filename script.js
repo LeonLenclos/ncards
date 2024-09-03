@@ -1,8 +1,24 @@
 window.onload = function() {
-for (let i = 1; i <= 202; i++) {
-    console.log('faisage de la carte numéro ',i)
-    domCard(distributeLines(i),i);
-}
+  for (let i = 1; i <= 116; i+=1) {
+    console.log('faisage des cartes numéro ',i)
+    domCard(distributeLines(i),i,'♥');
+    domCard(distributeLines(i),i,'♠');
+    domCard(distributeLines(i),i,'♦');
+    domCard(distributeLines(i),i,'♣');
+  }
+  document.body.innerHTML = document.body.innerHTML + `
+  <div title="joker" class="card red">
+  <div class="corner">J<br>O<br>K<br>E<br>R</div>
+    <div class="enseigne"><div class="line"><div class="symbol">☺</div></div></div>
+    <div class="corner upsidedown">J<br>O<br>K<br>E<br>R</div>
+  </div>
+
+<div title="joker" class="card">
+<div class="corner">J<br>O<br>K<br>E<br>R</div>
+<div class="enseigne"><div class="line"><div class="symbol">☺</div></div></div>
+<div class="corner upsidedown">J<br>O<br>K<br>E<br>R</div>
+</div>
+  `;
 };
 
 
@@ -14,13 +30,16 @@ function printCard(a){
   }
 }
 
-function domCard(a,n){
+function domCard(a,n,s){
   let card = document.createElement('div');
   card.title=n;
   card.classList.add('card');
+  if(s=='♥'|| s=='♦'){
+    card.classList.add('red');
+  }
   let enseigne = document.createElement('div');
   enseigne.classList.add('enseigne');
-  let fontSize=1/Math.floor(a[0]/2)
+  let fontSize=1/Math.floor(a[0].length/2)
   enseigne.style.fontSize=fontSize+'em';
 
   let corner1 = document.createElement('div');
@@ -28,21 +47,27 @@ function domCard(a,n){
   let corner2 = document.createElement('div');
   corner2.classList.add('corner');
   corner2.classList.add('upsidedown');
-  corner1.innerHTML=corner2.innerHTML=n+'<br/>'+'♥';
+  corner1.innerHTML=corner2.innerHTML=n+'<br/>'+s;
   let w=a[0];
-  for(i=0;i<a.length;i++){
+  for(let i=0;i<a.length;i++){
     let line=document.createElement('div');
     line.classList.add('line');
-    for(j=0;j<w*2-1;j++){
+    for (let j=0; j<a[i].length;j++) {
+      if(!(i%2==0&&j==0)){
+        line.appendChild(document.createElement('div'));
+      }
       let symbol = document.createElement('div');
-      if((i%2==0 && j%2==0) || (i%2==1 && j%2==1 && j<2*a[i])){
+      if(a[i][j]){
         symbol.classList.add('symbol');
+        symbol.innerHTML = s;
         if(i>a.length/2){
           symbol.classList.add('upsidedown');
         }
-        symbol.innerHTML = '♥';
       }
       line.appendChild(symbol);
+      if(i%2==1&&j==a[i].length-1){
+        line.appendChild(document.createElement('div'));
+      }
     }
     enseigne.appendChild(line);
   }
@@ -74,19 +99,33 @@ function distributeLines(number) {
     }
   } 
   
-  let lines = Array(h*2-1).fill(0);
+  let lines = Array(h*2-1).fill([]);
 
-  for(let index=0; index<lines.length ; index+=2){
-    lines[index]=w;
+  for(let index=0; index<lines.length ; index++){
+    if (index%2==0) {
+      lines[index]=Array(w).fill(true);
+    } else {
+      lines[index]=Array(w-1).fill(false);
+    }
   }
   
-  for(let index=1; index<lines.length ; index+=2){
-    if(i>=w-1){
-     lines[index]=w-1;
-     i-=w-1;
-    } else {
-      lines[index]=i;
-      i=0;
+  let intermediaires = Array((h-1)*(w-1)).fill(0);
+  if(intermediaires.length%2==1 && i%2==1){
+    intermediaires[Math.floor(intermediaires.length/2)]=1;
+    i--;
+  }
+  for (let index = 0; index < intermediaires.length ; index++) {
+    if(i>0){
+      intermediaires[index]=1;
+      i--;
+    }
+    if(i>0){
+      intermediaires[intermediaires.length-1-index]=1;
+      i--;
+    }
+
+    if(intermediaires[index]){
+      lines[1+2*Math.floor(index/(w-1))][index%(w-1)]=true;
     }
   }
 
